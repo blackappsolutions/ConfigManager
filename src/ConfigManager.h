@@ -253,7 +253,7 @@ class ConfigManager {
   void startAP();
   void startAPApi();
   void startApi();
-  void createBaseWebServer();
+  void createBaseWebServer(boolean skipIndexPage);
 
   void readConfig();
   void writeConfig();

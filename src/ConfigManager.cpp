@@ -146,7 +146,7 @@ void ConfigManager::startAP() {
 
 void ConfigManager::startAPApi() {
   DebugPrintln(F("AP Api Mode"));
-  createBaseWebServer();
+  createBaseWebServer(false);
 
   if (apCallback) {
     apCallback(server.get());
@@ -157,7 +157,7 @@ void ConfigManager::startAPApi() {
 
 void ConfigManager::startApi() {
   DebugPrintln(F("Station Mode"));
-  createBaseWebServer();
+  createBaseWebServer(true);
 
   server->on("/settings", HTTPMethod::HTTP_GET,
              std::bind(&ConfigManager::handleSettingsGetREST, this));
@@ -429,7 +429,7 @@ void ConfigManager::setWebPort(const int port) {
   this->webPort = port;
 }
 
-void ConfigManager::createBaseWebServer() {
+void ConfigManager::createBaseWebServer(boolean skipIndexPage) {
   const char* headerKeys[] = {"Content-Type"};
   size_t headerKeysSize = sizeof(headerKeys) / sizeof(char*);
 
@@ -439,10 +439,13 @@ void ConfigManager::createBaseWebServer() {
 
   server->collectHeaders(headerKeys, headerKeysSize);
 
-  server->on(this->wifiConfigURI, HTTPMethod::HTTP_GET,
-             std::bind(&ConfigManager::handleAPGet, this));
-  server->on(this->wifiConfigURI, HTTPMethod::HTTP_POST,
-             std::bind(&ConfigManager::handleAPPost, this));
+	if(!skipIndexPage){
+	  server->on(this->wifiConfigURI, HTTPMethod::HTTP_GET,
+               std::bind(&ConfigManager::handleAPGet, this));
+    server->on(this->wifiConfigURI, HTTPMethod::HTTP_POST,
+               std::bind(&ConfigManager::handleAPPost, this));
+	}
+
   DebugPrintln("Index page registered");
 
   server->on("/scan", HTTPMethod::HTTP_GET,
